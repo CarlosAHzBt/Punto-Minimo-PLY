@@ -13,25 +13,34 @@ def segmentar_roi(pcd, roi_min, roi_max):
     return roi
 
 if __name__ == "__main__":
-    nombre_archivo_ply = "nubes de puntos/6-90.ply"  # Reemplaza con la ruta de tu archivo PLY
+    nombre_archivo_ply = "nubes de puntos/mouse.ply"  # Reemplaza con la ruta de tu archivo PLY
 
     pcd = cargar_ply(nombre_archivo_ply)
 
     # Definir las coordenadas de la región de interés (ROI)
-    roi_min = np.array([-0.08, -0.08, -0.99])  # Reemplaza con las coordenadas mínimas de la ROI
-    roi_max = np.array([0.08, 0.08, -0.7])    # Reemplaza con las coordenadas máximas de la ROI
+    roi_min = np.array([-0.2, -0.0, -1.1])  # Reemplaza con las coordenadas mínimas de la ROI
+    roi_max = np.array([0.2, 0.2, -0.3])    # Reemplaza con las coordenadas máximas de la ROI
 
     # Segmentar la región de interés (ROI)
     roi = segmentar_roi(pcd, roi_min, roi_max)
 
     # Obtener las coordenadas de los puntos dentro de la ROI
     puntos_roi = np.asarray(roi.points)
+    # Calcular la superficie estimada (moda de alturas)
+    superficie_estimada = np.median(puntos_roi[:, 2])  # Puedes usar median o mean según tu necesidad
+
+    print(f"Superficie estimada: {superficie_estimada:.4f} unidades")
 
     # Encontrar el índice del punto con la coordenada Z más baja (punto más profundo)
     idx_punto_mas_profundo = np.argmin(puntos_roi[:, 2])
 
+    # Calcular la profundidad del agujero en base a la superficie estimada
+    profundidad_agujero = puntos_roi[idx_punto_mas_profundo, 2] - superficie_estimada
+
+    print(f"Profundidad del agujero desde la superficie: {profundidad_agujero:.4f} unidades")
+
     # Cambiar el color del punto más profundo a rosa
-    rosa = [1, 0.75, 0.8]  # Color rosa (RGB)
+    rosa = [1, 0, 1]  # Color rosa (RGB)
     roi.colors[idx_punto_mas_profundo] = rosa
 
     # Crear una ventana para visualizar la región de interés (ROI)
